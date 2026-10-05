@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}VoiceAuth — Your Voice is Your Password{% endblock %}
+{% block description %}Sign up or log in using your voice. AI-powered speaker verification with anti-spoofing protection.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="/static/css/auth.css">{% endblock %}
+
+{% block body %}
+<!-- Floating background orbs -->
+<div class="auth-orb auth-orb-1"></div>
+<div class="auth-orb auth-orb-2"></div>
+<div class="auth-orb auth-orb-3"></div>
+
+<main class="auth-page" style="flex-direction: column; gap: 80px; padding-top: 60px;">
+
+  <!-- Hero Section -->
+  <section style="text-align: center; animation: slideUp 0.6s ease both;">
+
+    <!-- Logo -->
+    <div style="display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 36px;">
+      <div style="
+        width: 60px; height: 60px;
+        background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+        border-radius: 16px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.8rem;
+        box-shadow: 0 0 30px rgba(124,58,237,0.5);
+        animation: pulse-glow 3s ease-in-out infinite;
+      ">🎙️</div>
+      <h1 style="font-size: 2.5rem; font-weight: 900;" class="text-gradient">VoiceAuth</h1>
+    </div>
+
+    <!-- Tagline -->
+    <p style="font-size: 1.375rem; color: var(--text-secondary); margin-bottom: 12px; font-weight: 500;">
+      Your voice is your password.
+    </p>
+    <p style="font-size: 1rem; color: var(--text-muted); max-width: 500px; margin: 0 auto 48px;">
+      Biometric authentication powered by speaker verification and AI anti-spoofing.
+      No passwords to forget. No tokens to carry.
+    </p>
+
+    <!-- CTA Buttons -->
+    <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+      <a href="/auth/signup/voice" class="btn btn-primary btn-lg" id="get-started-btn">
+        🎤 Get Started — Sign Up
+      </a>
+      <a href="/auth/signin" class="btn btn-secondary btn-lg" id="signin-link">
+        → Sign In
+      </a>
+    </div>
+  </section>
+
+  <!-- Feature Cards -->
+  <section style="
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    max-width: 860px;
+    width: 100%;
+    animation: slideUp 0.8s ease 0.2s both;
+  ">
+    {% set features = [
+      ('🛡️', 'Anti-Spoofing', 'AASIST detects replay and synthetic audio attacks before any comparison is made.', 'var(--accent-red)'),
+      ('🗣️', 'Speaker Verification', 'CAM++ neural network extracts a 192-dim voiceprint unique to you.', 'var(--accent-purple-2)'),
+      ('🔇', 'Noise Suppression', 'DeepFilterNet cleans your audio before analysis — works in noisy environments.', 'var(--accent-cyan)'),
+      ('🔒', 'Privacy-First', 'Only your voice embedding is stored — never raw audio. Embeddings cannot be reverse-engineered.', 'var(--accent-green)'),
+    ] %}
+    {% for icon, title, desc, color in features %}
+    <div class="glass-card" style="padding: 28px 24px; animation: slideUp {{ 0.4 + loop.index0 * 0.1 }}s ease both;">
+      <div style="font-size: 2rem; margin-bottom: 14px; filter: drop-shadow(0 0 8px {{ color }});">{{ icon }}</div>
+      <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 8px; color: var(--text-primary);">{{ title }}</h3>
+      <p style="font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6;">{{ desc }}</p>
+    </div>
+    {% endfor %}
+  </section>
+
+  <!-- Pipeline Diagram -->
+  <section style="
+    text-align: center;
+    max-width: 700px;
+    width: 100%;
+    animation: slideUp 1s ease 0.4s both;
+  ">
+    <p style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 16px;">
+      AI Pipeline
+    </p>
+    <div style="
+      display: flex; align-items: center; gap: 8px;
+      justify-content: center; flex-wrap: wrap;
+      font-size: 0.8125rem; color: var(--text-secondary);
+    ">
+      {% for step in ['VAD', '→', 'Denoise', '→', 'Anti-Spoof', '→', 'Speaker ID', '→', 'Match'] %}
+        {% if step == '→' %}
+          <span style="color: var(--text-muted);">→</span>
+        {% else %}
+          <span class="badge badge-purple">{{ step }}</span>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer style="
+    text-align: center;
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    padding-bottom: 32px;
+    animation: fadeIn 1.2s ease both;
+  ">
+    Built with FastAPI · Silero VAD · DeepFilterNet · AASIST · CAM++
+  </footer>
+
+</main>
+{% endblock %}

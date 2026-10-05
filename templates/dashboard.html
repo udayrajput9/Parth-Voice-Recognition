@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}Dashboard | VoiceAuth{% endblock %}
+{% block description %}Voice verification dashboard — read lines aloud and see real-time authentication results.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="/static/css/dashboard.css">{% endblock %}
+
+{% block body %}
+<div class="dashboard-page">
+
+  <!-- ── Navbar ─────────────────────────────────────────── -->
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <div class="navbar-brand-icon">🎙️</div>
+      VoiceAuth
+    </div>
+    <div class="navbar-right">
+      <div class="navbar-user">
+        <div class="navbar-avatar">{{ current_user.full_name[0].upper() }}</div>
+        <span>{{ current_user.username }}</span>
+      </div>
+      <a href="/voice/health" class="btn btn-secondary btn-sm"
+         style="font-size: 0.75rem; padding: 6px 12px;"
+         target="_blank" title="Check model health">
+        ❤️ Health
+      </a>
+      <a href="/auth/logout" class="btn btn-danger btn-sm" id="logout-btn">
+        Logout
+      </a>
+    </div>
+  </nav>
+
+  <!-- ── Stats Bar ──────────────────────────────────────── -->
+  <div class="stats-bar">
+    <div class="stat-item">
+      <span class="stat-label">Total Lines Tested</span>
+      <span class="stat-value total" id="stat-total">0</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">✅ Authenticated</span>
+      <span class="stat-value auth" id="stat-auth">0</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">❌ Failed</span>
+      <span class="stat-value failed" id="stat-failed">0</span>
+    </div>
+    <div class="stat-item" style="margin-left: auto; border-right: none;">
+      <span style="font-size: 0.8rem; color: var(--text-muted);">
+        Welcome, <strong style="color: var(--text-primary);">{{ current_user.full_name }}</strong>
+      </span>
+    </div>
+  </div>
+
+  <!-- ── Main Content ───────────────────────────────────── -->
+  <div class="dashboard-content">
+
+    <!-- Left: Paragraph Reader -->
+    <section class="paragraph-reader" aria-label="Paragraph reader">
+      <div class="panel-header">
+        <div class="panel-title">
+          📄 Voice Verification Tester
+          <span class="badge badge-purple panel-badge">{{ paragraph_lines | length }} Lines</span>
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-muted);">
+          Click 🎙️ to read a line
+        </div>
+      </div>
+
+      <div class="lines-list" id="lines-list">
+        {% for line in paragraph_lines %}
+        <div class="line-item"
+             id="line-item-{{ loop.index }}"
+             data-line-num="{{ loop.index }}"
+             data-line-text="{{ line | e }}">
+          <span class="line-num">{{ loop.index }}</span>
+          <span class="line-text">{{ line }}</span>
+          <button class="line-mic-btn"
+                  id="mic-btn-{{ loop.index }}"
+                  title="Record line {{ loop.index }}"
+                  aria-label="Record line {{ loop.index }}">
+            🎙️
+          </button>
+          <span class="line-status" id="line-status-{{ loop.index }}"></span>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- Right: Terminal -->
+    <section class="terminal-panel" aria-label="Verification terminal">
+      <!-- Terminal chrome -->
+      <div class="terminal-header">
+        <div class="terminal-dots">
+          <div class="terminal-dot red"></div>
+          <div class="terminal-dot yellow"></div>
+          <div class="terminal-dot green"></div>
+        </div>
+        <span class="terminal-title">voice_auth — verification output</span>
+        <button class="btn btn-sm" id="clear-terminal"
+                style="background: none; color: var(--text-muted); font-size: 0.75rem; padding: 4px 8px;">
+          Clear
+        </button>
+      </div>
+
+      <!-- Waveform canvas (shown while recording) -->
+      <div class="terminal-waveform">
+        <canvas id="terminal-canvas" style="width: 100%; height: 36px;"></canvas>
+      </div>
+
+      <!-- Terminal output body -->
+      <div class="terminal-body" id="terminal-body">
+        <div class="terminal-line">
+          <span class="terminal-prompt">$</span>
+          <span class="terminal-out terminal-cursor"></span>
+        </div>
+      </div>
+
+      <!-- Terminal footer -->
+      <div class="terminal-footer">
+        <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);">
+          Threshold: signin=0.75 / dashboard=0.70
+        </span>
+        <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-green-2);">
+          ● Ready
+        </span>
+      </div>
+    </section>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/dashboard.js"></script>
+{% endblock %}

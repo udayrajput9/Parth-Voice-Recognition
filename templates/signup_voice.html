@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}Sign Up — Create Voice Signature | VoiceAuth{% endblock %}
+{% block description %}Step 1: Record your voice to create your unique biometric signature.{% endblock %}
+{% block extra_css %}
+  <link rel="stylesheet" href="/static/css/auth.css">
+  <style>
+    body { overflow-y: auto; }
+    .waveform-bar { display: inline-block; }
+  </style>
+{% endblock %}
+
+{% block body %}
+<div class="auth-orb auth-orb-1"></div>
+<div class="auth-orb auth-orb-2"></div>
+
+<div class="auth-page" style="align-items: flex-start; min-height: 100vh; padding: 32px 24px;">
+  <div style="width: 100%; max-width: 960px; margin: 0 auto;">
+
+    <!-- Logo + Header -->
+    <a href="/auth/" class="auth-logo" style="margin-bottom: 24px;">
+      <div class="auth-logo-icon">🎙️</div>
+      <span class="auth-logo-text">VoiceAuth</span>
+    </a>
+
+    <!-- Step Indicator -->
+    <div class="steps glass-card" style="padding: 16px 24px; margin-bottom: 28px;">
+      <div class="step">
+        <div class="step-circle active">1</div>
+        <span class="step-label">Record Voice</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step">
+        <div class="step-circle inactive">2</div>
+        <span class="step-label">Account Details</span>
+      </div>
+    </div>
+
+    <div class="glass-card" style="padding: 32px;">
+      <h1 class="auth-title">Create Your Voice Signature</h1>
+      <p class="auth-subtitle">Just read the 6 short sentences below aloud — it takes about 30 seconds. Speak naturally, like you're talking to a friend.</p>
+
+      <div class="enrollment-layout">
+
+        <!-- Left: Paragraph -->
+        <div>
+          <div class="paragraph-panel" id="paragraph-panel">
+            <h3>Read these 6 sentences aloud 📖</h3>
+            {% for line in paragraph_lines %}
+            <div class="paragraph-line {% if loop.first %}active{% endif %}" id="line-{{ loop.index }}">
+              <span class="line-num">{{ loop.index }}</span>
+              <span class="line-text">{{ line }}</span>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Right: Recording Panel -->
+        <div class="recording-panel">
+
+          <!-- Waveform -->
+          <div class="waveform-container" id="waveform">
+            {% for _ in range(32) %}
+            <div class="waveform-bar" style="height: 4px;"></div>
+            {% endfor %}
+          </div>
+
+          <!-- Record Button -->
+          <button class="record-btn" id="record-btn" type="button" title="Start/Stop recording">
+            🎙️
+          </button>
+          <span class="record-btn-label" id="record-label">Start Recording</span>
+
+          <!-- Timer + Progress toward target duration -->
+          <div id="rec-progress-wrap" style="width: 100%; display: none;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px;">
+              <span id="rec-timer">0:00</span>
+              <span id="rec-target">target ~25s</span>
+            </div>
+            <div style="height: 6px; border-radius: 3px; background: rgba(255,255,255,0.12); overflow: hidden;">
+              <div id="rec-progress" style="height: 100%; width: 0%; border-radius: 3px; background: linear-gradient(90deg, #f59e0b, #22c55e); transition: width 0.3s;"></div>
+            </div>
+          </div>
+
+          <!-- Status -->
+          <p class="record-status" id="record-status">Click the mic and read the 6 sentences.</p>
+
+          <!-- Audio Preview -->
+          <div class="audio-preview" id="audio-preview">
+            <p style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 8px;">Preview your recording:</p>
+            <audio controls id="audio-player"></audio>
+          </div>
+
+          <!-- Submit -->
+          <button class="btn btn-primary" id="submit-btn" disabled style="width: 100%;">
+            Submit Voice Signature →
+          </button>
+
+          <!-- Status Alert -->
+          <div id="submit-status" style="width: 100%;"></div>
+
+          <!-- Tips -->
+          <div style="font-size: 0.8rem; color: var(--text-muted); text-align: center; line-height: 1.6;">
+            💡 Speak at a normal pace — no need to be slow.<br>
+            Stay 15–30 cm from the microphone.<br>
+            A quiet room gives the most accurate signature.
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <p class="auth-footer" style="margin-top: 20px;">
+      Already have an account? <a href="/auth/signin">Sign In</a>
+    </p>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/signup_voice.js"></script>
+{% endblock %}

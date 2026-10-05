@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="index, follow">
+  <title>{% block title %}VoiceAuth — Voice-Based Authentication{% endblock %}</title>
+  <meta name="description" content="{% block description %}Secure voice-based biometric authentication using AI speaker verification.{% endblock %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/static/css/base.css">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  {% if messages %}
+  <div class="flash-container">
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }} animate-slide-up">{{ message }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% block body %}{% endblock %}
+
+  <script src="/static/js/recorder.js"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

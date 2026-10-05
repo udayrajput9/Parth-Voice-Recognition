@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}Sign In | VoiceAuth{% endblock %}
+{% block description %}Sign in with your username, password, and voice verification.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="/static/css/auth.css">{% endblock %}
+
+{% block body %}
+<div class="auth-orb auth-orb-1"></div>
+<div class="auth-orb auth-orb-2"></div>
+<div class="auth-orb auth-orb-3"></div>
+
+<div class="auth-page">
+  <div class="auth-card glass-card">
+
+    <!-- Logo -->
+    <a href="/auth/" class="auth-logo">
+      <div class="auth-logo-icon">🎙️</div>
+      <span class="auth-logo-text">VoiceAuth</span>
+    </a>
+
+    <!-- ── Step 1: Credentials ─────────────────────────── -->
+    <div id="step1-panel" class="panel">
+      <h1 class="auth-title">Welcome back</h1>
+      <p class="auth-subtitle">Enter your credentials to continue to voice verification.</p>
+
+      <form class="auth-form" id="login-form" novalidate>
+        <div class="input-group">
+          <label class="input-label" for="username">Username</label>
+          <input class="input-field" type="text" id="username" name="username"
+                 placeholder="Your username" autocomplete="username" required>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="password">Password</label>
+          <input class="input-field" type="password" id="password" name="password"
+                 placeholder="Your password" autocomplete="current-password" required>
+        </div>
+
+        <div id="login-error" class="alert" style="display: none;"></div>
+
+        <button class="btn btn-primary" type="submit" id="login-btn" style="width: 100%;">
+          Continue →
+        </button>
+      </form>
+
+      <p class="auth-footer">
+        Don't have an account? <a href="/auth/signup/voice">Sign Up</a>
+      </p>
+    </div>
+
+    <!-- ── Step 2: Voice Challenge ─────────────────────── -->
+    <div id="step2-panel" class="panel hidden">
+
+      <h1 class="auth-title">Voice Verification</h1>
+      <p class="auth-subtitle">One more step — prove it's really you.</p>
+
+      <div class="voice-challenge">
+        <p style="font-size: 0.875rem; color: var(--text-muted);">Say these words clearly, in order:</p>
+
+        <div class="passphrase-display" id="passphrase-word" style="font-size: 1.5rem; letter-spacing: 0.05em; font-weight: 600;">…</div>
+
+        <p class="voice-challenge-hint">🔒 These words are unique to this signin — a recording of your voice cannot pass.</p>
+
+        <!-- Waveform bars -->
+        <div class="waveform-container" style="margin-bottom: 16px;">
+          {% for _ in range(24) %}
+          <div class="waveform-bar challenge-waveform-bar" style="height: 4px;"></div>
+          {% endfor %}
+        </div>
+
+        <!-- Record button -->
+        <button class="record-btn" id="challenge-record-btn" type="button"
+                style="margin: 0 auto 12px;" title="Record voice challenge">
+          🎙️
+        </button>
+        <span class="record-btn-label" id="challenge-label">Tap to Speak</span>
+
+        <!-- Status -->
+        <p class="record-status" id="challenge-status" style="margin-top: 8px;">
+          Tap the button and say the phrase above
+        </p>
+
+        <!-- Error -->
+        <div id="voice-error" class="alert" style="margin-top: 16px; display: none;"></div>
+
+        <!-- Retry button (shown on failure) -->
+        <button class="btn btn-secondary btn-sm" id="retry-btn" style="display: none; margin-top: 12px;">
+          🔄 Try Again
+        </button>
+
+        <!-- Back to step 1 -->
+        <button class="btn" id="back-btn" type="button"
+                style="background: none; color: var(--text-muted); font-size: 0.875rem; margin-top: 8px;">
+          ← Back to Login
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Fix alert display (auth.css uses display:flex but elements start hidden)
+  document.getElementById('login-error').style.display = 'none';
+  document.getElementById('voice-error').style.display = 'none';
+
+  // Override the display logic for these alerts in signin_voice.js
+  const _origLoginError = document.getElementById('login-error');
+  Object.defineProperty(_origLoginError, 'textContent', {
+    set(v) { this.innerText = v; this.style.display = v ? 'flex' : 'none'; },
+    get() { return this.innerText; }
+  });
+  const _origVoiceError = document.getElementById('voice-error');
+  Object.defineProperty(_origVoiceError, 'textContent', {
+    set(v) { this.innerText = v; this.style.display = v ? 'flex' : 'none'; },
+    get() { return this.innerText; }
+  });
+
+  document.getElementById('back-btn').addEventListener('click', () => {
+    document.getElementById('step2-panel').classList.add('hidden');
+    document.getElementById('step1-panel').classList.remove('hidden');
+    document.getElementById('login-btn').disabled = false;
+    document.getElementById('login-btn').innerHTML = 'Continue →';
+  });
+</script>
+<script src="/static/js/signin_voice.js"></script>
+{% endblock %}

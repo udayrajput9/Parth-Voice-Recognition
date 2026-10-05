@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+{% block title %}Sign Up — Account Details | VoiceAuth{% endblock %}
+{% block description %}Step 2: Enter your account details to complete registration.{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="/static/css/auth.css">{% endblock %}
+
+{% block body %}
+<div class="auth-orb auth-orb-1"></div>
+<div class="auth-orb auth-orb-2"></div>
+
+<div class="auth-page">
+  <div class="auth-card glass-card">
+
+    <!-- Logo -->
+    <a href="/auth/" class="auth-logo">
+      <div class="auth-logo-icon">🎙️</div>
+      <span class="auth-logo-text">VoiceAuth</span>
+    </a>
+
+    <!-- Step Indicator -->
+    <div class="steps" style="margin-bottom: 24px;">
+      <div class="step">
+        <div class="step-circle done">✓</div>
+        <span class="step-label">Voice Recorded</span>
+      </div>
+      <div class="step-line done"></div>
+      <div class="step">
+        <div class="step-circle active">2</div>
+        <span class="step-label">Your Details</span>
+      </div>
+    </div>
+
+    <!-- Success Banner -->
+    <div class="alert alert-success" style="margin-bottom: 24px;">
+      ✅ Voice signature created successfully!
+    </div>
+
+    <h1 class="auth-title">Create Your Account</h1>
+    <p class="auth-subtitle">Almost there! Fill in your details to complete registration.</p>
+
+    <!-- Hidden enrollment token -->
+    <input type="hidden" id="enrollment-token" value="{{ enrollment_token }}">
+
+    <form class="auth-form" id="details-form" novalidate>
+
+      <div class="input-group">
+        <label class="input-label" for="full-name">Full Name</label>
+        <input class="input-field" type="text" id="full-name" name="full_name"
+               placeholder="e.g. Parth Sharma" autocomplete="name" required>
+        <div class="input-error" id="err-full-name"></div>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label" for="username">Username</label>
+        <input class="input-field" type="text" id="username" name="username"
+               placeholder="e.g. parth_dev" autocomplete="username" required minlength="3">
+        <div class="input-error" id="err-username"></div>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label" for="email">Email Address</label>
+        <input class="input-field" type="email" id="email" name="email"
+               placeholder="you@example.com" autocomplete="email" required>
+        <div class="input-error" id="err-email"></div>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label" for="password">Password</label>
+        <input class="input-field" type="password" id="password" name="password"
+               placeholder="Minimum 8 characters" autocomplete="new-password" required minlength="8">
+        <!-- Strength bar -->
+        <div style="margin-top: 6px; height: 4px; background: var(--border); border-radius: 2px;">
+          <div id="strength-bar" style="height: 100%; width: 0%; border-radius: 2px; transition: all 0.3s;"></div>
+        </div>
+        <div id="strength-label" style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;"></div>
+        <div class="input-error" id="err-password"></div>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label" for="confirm-password">Confirm Password</label>
+        <input class="input-field" type="password" id="confirm-password" name="confirm_password"
+               placeholder="Repeat your password" autocomplete="new-password" required>
+        <div class="input-error" id="err-confirm-password"></div>
+      </div>
+
+      <div id="form-error" class="alert" style="display: none;"></div>
+
+      <button class="btn btn-primary" type="submit" id="submit-btn" style="width: 100%;">
+        Create Account 🎉
+      </button>
+    </form>
+
+    <p class="auth-footer">
+      <a href="/auth/signup/voice">← Re-record voice</a>
+    </p>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+  const token       = document.getElementById('enrollment-token').value;
+  const form        = document.getElementById('details-form');
+  const submitBtn   = document.getElementById('submit-btn');
+  const formError   = document.getElementById('form-error');
+  const passEl      = document.getElementById('password');
+  const confEl      = document.getElementById('confirm-password');
+  const strengthBar = document.getElementById('strength-bar');
+  const strengthLbl = document.getElementById('strength-label');
+
+  // Password strength
+  passEl.addEventListener('input', () => {
+    const v = passEl.value;
+    let score = 0;
+    if (v.length >= 8)  score++;
+    if (/[A-Z]/.test(v)) score++;
+    if (/[0-9]/.test(v)) score++;
+    if (/[^A-Za-z0-9]/.test(v)) score++;
+    const labels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
+    const colors = ['', '#EF4444', '#F59E0B', '#10B981', '#06B6D4'];
+    strengthBar.style.width  = (score * 25) + '%';
+    strengthBar.style.background = colors[score] || '';
+    strengthLbl.textContent  = labels[score] || '';
+    strengthLbl.style.color  = colors[score] || '';
+  });
+
+  function clearErrors() {
+    ['full-name','username','email','password','confirm-password'].forEach(id => {
+      const el = document.getElementById('err-' + id);
+      const field = document.getElementById(id);
+      if (el) el.textContent = '';
+      if (field) field.classList.remove('error');
+    });
+    formError.style.display = 'none';
+  }
+
+  function showFieldError(field, msg) {
+    const errEl = document.getElementById('err-' + field);
+    const fieldEl = document.getElementById(field);
+    if (errEl) errEl.textContent = msg;
+    if (fieldEl) fieldEl.classList.add('error');
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearErrors();
+
+    const fullName = document.getElementById('full-name').value.trim();
+    const username = document.getElementById('username').value.trim();
+    const email    = document.getElementById('email').value.trim();
+    const pass     = passEl.value;
+    const conf     = confEl.value;
+
+    // Client-side validation
+    let hasError = false;
+    if (!fullName) { showFieldError('full-name', 'Full name is required.'); hasError = true; }
+    if (username.length < 3) { showFieldError('username', 'Username must be at least 3 characters.'); hasError = true; }
+    if (!email.includes('@')) { showFieldError('email', 'Please enter a valid email address.'); hasError = true; }
+    if (pass.length < 8) { showFieldError('password', 'Password must be at least 8 characters.'); hasError = true; }
+    if (pass !== conf) { showFieldError('confirm-password', 'Passwords do not match.'); hasError = true; }
+    if (hasError) return;
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner"></span> Creating account...';
+
+    const formData = new FormData();
+    formData.append('full_name', fullName);
+    formData.append('username', username);
+    formData.append('email', email);
+    formData.append('password', pass);
+    formData.append('confirm_password', conf);
+    formData.append('enrollment_token', token);
+
+    try {
+      const res  = await fetch('/auth/signup/details/submit', { method: 'POST', body: formData });
+      const data = await res.json();
+
+      if (data.success) {
+        submitBtn.innerHTML = '✅ Account created! Redirecting...';
+        window.location.href = data.redirect || '/dashboard';
+      } else {
+        if (data.errors) {
+          Object.entries(data.errors).forEach(([field, msg]) => showFieldError(field, msg));
+        }
+        formError.textContent = data.error || 'Something went wrong.';
+        formError.className   = 'alert alert-error';
+        formError.style.display = 'flex';
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Create Account 🎉';
+      }
+    } catch (err) {
+      formError.textContent = '❌ Network error: ' + err.message;
+      formError.className   = 'alert alert-error';
+      formError.style.display = 'flex';
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = 'Create Account 🎉';
+    }
+  });
+})();
+</script>
+{% endblock %}
